@@ -29,7 +29,15 @@ const FindChat = async (req, res) => {
     try {
       const chat = await ChatModel.findOne({
           members: {$all: [req.params.firstId, req.params.secondId]}
-      });
+      }).populate("members", "-password");
+      if(!chat){
+        const newChat = new ChatModel({
+          members: [req.params.firstId, req.params.secondId],
+        });
+        const result = await newChat.save();
+        res.status(200).json(result);
+        return;
+      }
       res.status(200).json(chat);
     } catch (error) {
       res.json({ message: error });
