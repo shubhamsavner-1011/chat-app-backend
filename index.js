@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const express = require("express");
 const dotenv = require("dotenv");
 const bodyParser = require("body-parser");
@@ -6,9 +7,19 @@ const app = express();
 const { Server } = require("socket.io");
 const http = require("http");
 const server = http.createServer(app);
-const { addMessage } = require("./src/controller/messageController");
+// const { addMessage } = require("./src/controller/messageController");
+const cloudinary = require("cloudinary").v2;
 
 require("./src/config/db");
+
+
+cloudinary.config({ 
+  // eslint-disable-next-line no-undef
+  cloud_name: process.env.CLOUDINARY_NAME, 
+  api_key: process.env.CLOUDINARY_API_KEY, 
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true
+});
 const Port = process.env.PORT;
 dotenv.config();
 
@@ -61,7 +72,7 @@ socketIO.on("connection", (socket) => {
   // });
 
   socket.on('send-message', (data) => {
-    console.log(data, 'messs' );
+    console.log(data, 'sending-data')
     socket.to(data?.chatId).emit('receive-message',data);
  });
 
@@ -92,10 +103,12 @@ socketIO.on("connection", (socket) => {
 const userRouter = require("./src/routers/userRouter");
 const chatRouter = require("./src/routers/chatRouter") 
 const messageRouter = require("./src/routers/messageRouter") 
+
 //routes middleware
 app.use("/api/users", userRouter);
 app.use('/api/chat', chatRouter);
 app.use('/api/message', messageRouter)
+
 
 server.listen(Port, () => {
   console.log(`server is running on port ${Port}`);
