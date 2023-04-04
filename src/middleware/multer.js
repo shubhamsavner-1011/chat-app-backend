@@ -2,6 +2,7 @@ const multer = require('multer');
 
 
 exports.uploadImage = (req,res,next)=>{
+
     var storage = multer.diskStorage({})
       const upload = multer({ storage });
       upload.single('avatar')(req, res, (e) => {

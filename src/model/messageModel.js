@@ -2,11 +2,16 @@ const mongoose = require("mongoose");
 
 const messageSchema = new mongoose.Schema(
   {
-    text: { type: String},
+    text: { type: String, default : null},
     senderId: {
-      type: mongoose.Schema.Types.ObjectId,
-      trim: true,
+    _id: {
+      type: String,
       ref: "User",
+    },
+    username: {
+      type: String,
+      ref: "User"
+    }
     },
     chatId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -14,7 +19,7 @@ const messageSchema = new mongoose.Schema(
     },
     imageId : {
       type : String,
-      ref:"Image"
+      ref: "Image"
     }
   },
   { timestamps: true }

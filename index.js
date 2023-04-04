@@ -72,7 +72,6 @@ socketIO.on("connection", (socket) => {
   // });
 
   socket.on('send-message', (data) => {
-    console.log(data, 'sending-data')
     socket.to(data?.chatId).emit('receive-message',data);
  });
 

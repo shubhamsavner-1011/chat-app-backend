@@ -9,38 +9,51 @@ module.exports.getMessages = async (req, res) => {
     })
       .populate("chatId")
       .populate("senderId", "username")
-      .populate("imageId")
+      // .populate("imageId");
+      console.log(data, 'get-messsa')
     return res.status(200).json({ data });
   } catch (error) {
-    res.json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 
 module.exports.addMessage = async (req, res) => {
-  console.log(req.body, 'body', req.file)
   try {
-    const file = await cloudinary.uploader.upload(req.file.path, {folder: "images",
-    width: 150,
-    crop: "scale",});
-    console.log(file, 'file????')
-    const newImage = new ImageModel({
-      "image": file.url,
-      "public_id": file.public_id
-     });
-     const image = await newImage.save();
+    if (req.file) {
+      const file = await cloudinary.uploader.upload(req.file.path, {
+        folder: "images",
+        width: 150,
+        crop: "scale",
+      });
+      console.log(file, 'file>>>>>>')
+      const newImage = new ImageModel({
+        image: file.url,
+        public_id: file.public_id,
+      });
+      const Image = await newImage.save();
+      req.imageId = Image._id
+      req.imgUrl = file.url
+    }
+    console.log(req.imageId, "imageId", req.body?.senderId.username);
     const newMessage = new MessageModel({
-      senderId: req.body.senderId,
-      text: req.body.text,
-      chatId: req.body.chatId,
-      imageId: image.id
+      senderId: {_id : req.body?.senderId, username: req.body?.senderId.username }, 
+      text:  req.body?.text,
+      chatId: req.body?.chatId,
+      imageId: req?.imageId || "",
     });
     const result = await newMessage.save();
-  const messageData = await MessageModel.findById(result.id).populate("imageId")  
-  console.log(messageData, 'messageData')
-  const imageUrl = messageData?.imageId.image
-  const {text, chatId, createdAt} = messageData
-    return res.status(200).json({data: {chatId,imageUrl,text,createdAt}});
+    console.log(result, 'server-result')
+    // const messageData = await MessageModel.findById(result.id).populate(
+    //   "imageId"
+    // );
+    // console.log(messageData, "messageData");
+    const imageUrl = req.imgUrl 
+    const { text, chatId, createdAt , senderId} = result;
+    return res
+      .status(200)
+      .json({ data: { chatId, imageUrl, text, createdAt, senderId } });
   } catch (error) {
-    res.json({ message: error });
+    console.log(error);
+    res.status(400).json({ message: error.message });
   }
 };
