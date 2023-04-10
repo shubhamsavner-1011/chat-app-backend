@@ -27,14 +27,16 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(
-  cors()
+  cors({
+    origin:"*"
+  })
 );
 
 let activeUsers = [];
 
 const socketIO = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "*",
     methods: ["GET", "POST"],
   },
 });
@@ -66,29 +68,16 @@ socketIO.on("connection", (socket) => {
     socket.join(room);
   });
 
-  // Private message
-  // socket.on('privateMessage', ({ roomId, message, fromUserId, toUserId }) => {
-  //   socket.to(roomId).emit('privateMessage', { message, fromUserId, toUserId });
-  // });
 
   socket.on('send-message', (data) => {
+    console.log(data, 'socket-response')
     socket.to(data?.chatId).emit('receive-message',data);
  });
 
-  
-  // socket.on("send-message", ({msg, username }) => {
-  //   console.log(msg,'meg')
-  //   // socketIO.to(anotherSocketId).emit("receive-message", {
-  //   //   socketId: socket.id,
-  //   //   message: msg,
-  //   //   userName: username,
-  //   // });
-  //   socket.broadcast.emit("receive-message", {
-  //     socketId: socket.id,
-  //     message: msg,
-  //     userName: username,
-  //   })
-  // });
+ socket.on('send-count', (data) => {
+  console.log(data, 'count-response')
+  socket.to(data?.chatId).emit('receive-count',data);
+});
 
   socket.on("disconnect", () => {
     // remove user from active users
